@@ -14,6 +14,8 @@ If using the MSVC compiler, it is recommended to install Microsoft Visual Studio
 
 For GCC, the only requirement is that GCC is installed and in your PATH.   
 
+For convenience, a precompiled 32-bit version of MinLib is included in the project's Dist folder.  
+
 ## Compiler Installation
 
 * [Microsoft Visual Studio](https://visualstudio.microsoft.com/downloads/)  
