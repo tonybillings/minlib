@@ -9,6 +9,12 @@
 using namespace std;
 using namespace minlib;
 
+/// <summary>
+/// Parameters are expected to be in the k=v format, with spaces allowed inbetween.  
+/// </summary>
+/// <param name="key_value">The key/value as a C-style string.</param>
+/// <param name="out_param">The parameter instance that should be set.</param>
+/// <returns>Returns true if the key/value was successfully parsed and the 'out-param' parameter was set.</returns>
 bool parameter::parse_param(const char* key_value, parameter& out_param)
 {
 	if (key_value == nullptr) return false;
@@ -38,6 +44,12 @@ bool parameter::parse_param(const char* key_value, parameter& out_param)
 	return false;
 }
 
+/// <summary>
+/// Get the parameters as supplied from the command-line.
+/// </summary>
+/// <param name="count">The number of command-line arguments passed in.</param>
+/// <param name="key_value_array">The command-line arguments.</param>
+/// <returns></returns>
 vector<parameter> parameter::get_params(size_t count, char* key_value_array[])
 {
 	vector<parameter> params;
@@ -52,6 +64,11 @@ vector<parameter> parameter::get_params(size_t count, char* key_value_array[])
 	return params;
 }
 
+/// <summary>
+/// Get the parameters from the config file.
+/// </summary>
+/// <param name="filename">The name of the config file.</param>
+/// <returns>List of parameters.</returns>
 vector<parameter> parameter::get_params(const string& filename)
 {
 	vector<parameter> params;
@@ -74,6 +91,11 @@ vector<parameter> parameter::get_params(const string& filename)
 	return params;
 }
 
+/// <summary>
+/// Some parameters have a value that is actually a space-delimited list of values.
+/// </summary>
+/// <param name="value">The space-delimited list of values.</param>
+/// <returns>List of values.</returns>
 vector<string> parameter::get_param_values(const string& value)
 {
 	stringstream ss;

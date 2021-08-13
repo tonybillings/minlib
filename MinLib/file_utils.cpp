@@ -8,6 +8,11 @@
 using namespace std;
 using namespace minlib;
 
+/// <summary>
+/// Get the contents of a file as a narrow string.
+/// </summary>
+/// <param name="filename">The name of the file.</param>
+/// <returns>The contents of the file.</returns>
 string get_file_contents(const char* filename) 
 {
     filesystem::path filepath(filesystem::absolute(filesystem::path(filename)));
@@ -47,13 +52,18 @@ string get_file_contents(const char* filename)
     return file_contents;
 }
 
-string get_expanded_path(const std::string& path)
+/// <summary>
+/// Replaces the environment variables in the path with their values.
+/// </summary>
+/// <param name="path">The path possibly containing one or more environment variables.</param>
+/// <returns>The path without environment variables.</returns>
+string get_expanded_path(const string& path)
 {
     string result(path);
 
     auto replace_vars = [&result](const string& regex_str) {
         regex env_var(regex_str);
-        std::smatch match;
+        smatch match;
         while (regex_search(result, match, env_var)) {
             auto var_name = regex_replace(match.str(0), regex("[\\%\\$\\{\\}]"), "");
             auto var_value = getenv(var_name.c_str());
@@ -70,13 +80,3 @@ string get_expanded_path(const std::string& path)
     return result;
 }
 
-void create_directory_path(const filesystem::path& src, const filesystem::path& target)
-{
-    for (const auto& dir : filesystem::recursive_directory_iterator(src.parent_path()))
-    {
-        const auto dir_path = dir.path();
-        const auto relative_src = filesystem::relative(dir_path, src.parent_path());
-        const auto target_parent_path = target / relative_src.parent_path();
-        filesystem::create_directories(target_parent_path);
-    }
-}

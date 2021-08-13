@@ -29,5 +29,5 @@ private:
 
 public:
 	static std::map<std::string, std::string> process_params(const std::vector<parameter>& params);
-	static bool run_commands(std::map<std::string, std::string>& param_map);
+	static int run_command(std::map<std::string, std::string>& param_map);
 };

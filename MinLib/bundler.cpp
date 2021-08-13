@@ -6,7 +6,12 @@
 
 using namespace std;
 
-void bundler::prepare_stage(const std::string& stage_include_dir, const std::string& stage_lib_dir)
+/// <summary>
+/// Ensures that the staging folders exist and are empty.
+/// </summary>
+/// <param name="stage_include_dir">The path to the include staging directory.</param>
+/// <param name="stage_lib_dir">The path to the lib staging directory.</param>
+void bundler::prepare_stage(const string& stage_include_dir, const string& stage_lib_dir)
 {
 	if (filesystem::exists(stage_include_dir) && filesystem::is_directory(stage_include_dir))
 		filesystem::remove_all(stage_include_dir);
@@ -17,6 +22,13 @@ void bundler::prepare_stage(const std::string& stage_include_dir, const std::str
 	filesystem::create_directory(stage_lib_dir);
 }
 
+/// <summary>
+/// Uses the bundle to copy the header files from the target library's include directory to the include staging directory.
+/// </summary>
+/// <param name="bundle">The bundle produced by the compiler.</param>
+/// <param name="working_dir_path">The path to the working directory.</param>
+/// <param name="stage_include_dir">The path to the include staging directory.</param>
+/// <param name="param_map">The parameters passed into the program.</param>
 void bundler::set_stage_includes(lib_bundle& bundle, const filesystem::path& working_dir_path, const string& stage_include_dir, map<string, string> param_map)
 {
 	auto include_dir_param = param_map.at(cli::INCLUDE_DIR_PARAM);
@@ -34,6 +46,8 @@ void bundler::set_stage_includes(lib_bundle& bundle, const filesystem::path& wor
 		auto should_include = false;
 		for (auto& id : include_dirs)
 		{
+			// We only want to include the header files that belong to the supplied include directories,
+			// that way we avoid including system headers.
 			if (size_t start_pos = include_from.find(id); start_pos == string::npos || start_pos != 0)
 				continue;
 
@@ -41,22 +55,29 @@ void bundler::set_stage_includes(lib_bundle& bundle, const filesystem::path& wor
 			break;
 		}
 
-		if (should_include)
-		{
-			string partition = include_from.substr(0, 2);
-			string include_to;
+		if (!should_include) continue;
 
-			if (regex_match(partition, regex("[A-Za-z]:")))
-				include_to = (filesystem::path(stage_include_dir) / include_from.substr(3)).u8string();
-			else
-				include_to = (filesystem::path(stage_include_dir) / include_from.substr(1)).u8string();
+		auto partition = include_from.substr(0, 2);
+		string include_to;
 
-			filesystem::create_directories(filesystem::path(include_to).parent_path());
-			filesystem::copy(include_from, include_to);
-		}
+		if (regex_match(partition, regex("[A-Za-z]:")))
+			include_to = (filesystem::path(stage_include_dir) / include_from.substr(3)).u8string(); // Windows
+		else
+			include_to = (filesystem::path(stage_include_dir) / include_from.substr(1)).u8string(); // *nix
+
+		filesystem::create_directories(filesystem::path(include_to).parent_path());
+		filesystem::copy(include_from, include_to);
 	}
 }
 
+
+/// <summary>
+/// Uses the bundle to copy the lib files from the target library's lib directory to the lib staging directory.
+/// </summary>
+/// <param name="bundle">The bundle produced by the compiler.</param>
+/// <param name="working_dir_path">The path to the working directory.</param>
+/// <param name="stage_include_dir">The path to the lib staging directory.</param>
+/// <param name="param_map">The parameters passed into the program.</param>
 void bundler::set_stage_libs(lib_bundle& bundle, const filesystem::path& working_dir_path, const string& stage_lib_dir, map<string, string> param_map)
 {
 	const auto& lib_dir_param = param_map.at(cli::LIB_DIR_PARAM);
@@ -89,24 +110,46 @@ void bundler::set_stage_libs(lib_bundle& bundle, const filesystem::path& working
 	}
 }
 
+/// <summary>
+/// Copy the header files from the include staging directory to the include target directory.
+/// </summary>
+/// <param name="working_dir_path">The path to the working directory.</param>
+/// <param name="stage_include_dir">The path to the include staging directory.</param>
+/// <param name="param_map">The parameters passed into the program.</param>
 void bundler::set_target_includes(const filesystem::path& working_dir_path, const string& stage_include_dir, map<string, string> param_map)
 {
 	auto include_out_dir = get_expanded_path(param_map.at(cli::INCLUDE_OUT_DIR_PARAM));
+
 	if (filesystem::path(include_out_dir).is_relative())
 		include_out_dir = (filesystem::path(working_dir_path) / include_out_dir).u8string();
+
 	if (!filesystem::exists(include_out_dir)) filesystem::create_directories(include_out_dir);
 	filesystem::copy(stage_include_dir, include_out_dir, filesystem::copy_options::overwrite_existing | filesystem::copy_options::recursive);
 }
 
+/// <summary>
+/// Copy the lib files from the lib staging directory to the lib target directory.
+/// </summary>
+/// <param name="working_dir_path">The path to the working directory.</param>
+/// <param name="stage_include_dir">The path to the lib staging directory.</param>
+/// <param name="param_map">The parameters passed into the program.</param>
 void bundler::set_target_libs(const filesystem::path& working_dir_path, const string& stage_lib_dir, map<string, string> param_map)
 {
 	auto lib_out_dir = get_expanded_path(param_map.at(cli::LIB_OUT_DIR_PARAM));
+
 	if (filesystem::path(lib_out_dir).is_relative())
 		lib_out_dir = (filesystem::path(working_dir_path) / lib_out_dir).u8string();
+
 	if (!filesystem::exists(lib_out_dir)) filesystem::create_directories(lib_out_dir);
 	filesystem::copy(stage_lib_dir, lib_out_dir, filesystem::copy_options::overwrite_existing | filesystem::copy_options::recursive);
 }
 
+/// <summary>
+/// Uses the bundle to copy the header/lib files from the target library to the staging
+/// directories and then subsequently to the final target directories.
+/// </summary>
+/// <param name="bundle">The bundle produced by the compiler.</param>
+/// <param name="param_map">The parameters passed into the program.</param>
 void bundler::bundle_library(lib_bundle& bundle, map<string, string> param_map)
 {
 	auto working_dir_path = filesystem::path(get_expanded_path(param_map.at(cli::WORKING_DIR_PARAM)));
