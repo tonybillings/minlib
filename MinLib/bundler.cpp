@@ -2,9 +2,12 @@
 #include <filesystem>
 #include <regex>
 #include "file_utils.hpp"
+#include "string_utils.hpp"
 #include "cli.hpp"
+#include "errors.hpp"
 
 using namespace std;
+using namespace minlib;
 
 /// <summary>
 /// Ensures that the staging folders exist and are empty.
@@ -69,7 +72,6 @@ void bundler::set_stage_includes(lib_bundle& bundle, const filesystem::path& wor
 		filesystem::copy(include_from, include_to);
 	}
 }
-
 
 /// <summary>
 /// Uses the bundle to copy the lib files from the target library's lib directory to the lib staging directory.
@@ -145,6 +147,56 @@ void bundler::set_target_libs(const filesystem::path& working_dir_path, const st
 }
 
 /// <summary>
+/// Copies any additional files as specified in the 'copy_files' parameter.
+/// </summary>
+/// <param name="working_dir_path">The path to the working directory.</param>
+/// <param name="param_map">The parameters passed into the program.</param>
+void bundler::copy_files(const std::filesystem::path& working_dir_path, std::map<std::string, std::string> param_map)
+{
+	auto copy_operations_str = param_map.at(cli::COPY_FILES_PARAM);
+	auto copy_operations_arr = str_split(copy_operations_str, ' ');
+
+	for (auto& str : copy_operations_arr)
+	{
+		if (str.size() < 3)
+			throw runtime_error(COPY_FILES_INVALID_ARG_ERROR);
+
+		string s;
+		string first = str.substr(0, 1);
+		string last = str.substr(str.size() - 1, 1);
+
+		if ((first == "\"" && last != "\"") || (first != "\"" && last == "\""))
+			throw runtime_error(COPY_FILES_INVALID_ARG_ERROR);
+		else if (first == "\"" && last == "\"")
+			s = str.substr(1, str.size() - 2);
+		else
+			s = move(str);
+
+		auto src_dst_arr = str_split(s, '>');
+		if (src_dst_arr.size() != 2)
+			throw runtime_error(COPY_FILES_INVALID_ARG_ERROR);
+
+		auto src = get_expanded_path(src_dst_arr[0]);
+		auto dst = get_expanded_path(src_dst_arr[1]);
+
+		if (!filesystem::exists(src))
+			throw runtime_error(regex_replace(COPY_FILES_SRC_MISSING_ERROR, regex("%s"), src));
+
+		try
+		{
+			filesystem::create_directories(filesystem::path(dst).parent_path());
+			filesystem::copy(src, dst, filesystem::copy_options::overwrite_existing);
+		}
+		catch (exception& ex)
+		{
+			string message = regex_replace(COPY_FILES_ERROR, regex("%s"), src);
+			message = regex_replace(message, regex("%e"), ex.what());
+			throw runtime_error(message);
+		}
+	}
+}
+
+/// <summary>
 /// Uses the bundle to copy the header/lib files from the target library to the staging
 /// directories and then subsequently to the final target directories.
 /// </summary>
@@ -167,4 +219,6 @@ void bundler::bundle_library(lib_bundle& bundle, map<string, string> param_map)
 
 	set_target_includes(working_dir_path, stage_include_dir, param_map);
 	set_target_libs(working_dir_path, stage_lib_dir, param_map);
+
+	copy_files(working_dir_path, param_map);
 }

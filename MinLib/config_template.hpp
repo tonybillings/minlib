@@ -31,5 +31,8 @@ include_out_dir = \r\n \
 \r\n \
 # The directory that the referenced libraries should be copied to.  Defaults to 'minlib_stage/lib' within the working directory. \r\n \
 lib_out_dir = \r\n \
+\r\n \
+# A space-delimited, double-quote encapsulated list of copy operations in the format: src>dst.  Example: \"SrcDir/FileA.txt>DstDir/FileA.txt\" \r\n \
+copy_files = \r\n \
 ";
 }

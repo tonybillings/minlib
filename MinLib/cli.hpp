@@ -21,6 +21,7 @@ public:
 	static const char* LIBS_PARAM;
 	static const char* INCLUDE_OUT_DIR_PARAM; 
 	static const char* LIB_OUT_DIR_PARAM;
+	static const char* COPY_FILES_PARAM;
 
 private:
 	static std::map<std::string, std::string> compile_params(const std::vector<parameter>& params);

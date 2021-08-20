@@ -13,4 +13,7 @@ namespace minlib
 	static const char* FILE_NOT_FOUND = "File '%s' not found.";
 	static const char* FILE_READ_ERROR = "File '%s' could not be opened.";
 	static const char* STRING_RESIZE_ERROR = "Could not resize string to %s bytes.";
+	static const char* COPY_FILES_INVALID_ARG_ERROR = "The 'copy_files' parameter is malformed.";
+	static const char* COPY_FILES_SRC_MISSING_ERROR = "Cannot copy '%s', as it could not be found.";
+	static const char* COPY_FILES_ERROR = "Could not copy '%s' due to error: %e";
 }

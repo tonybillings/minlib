@@ -23,6 +23,7 @@ const char* cli::LIB_DIR_PARAM = "lib_dir";
 const char* cli::LIBS_PARAM = "libs";
 const char* cli::INCLUDE_OUT_DIR_PARAM = "include_out_dir";
 const char* cli::LIB_OUT_DIR_PARAM = "lib_out_dir";
+const char* cli::COPY_FILES_PARAM = "copy_files";
 
 map<string, string> cli::compile_params(const vector<parameter>& params)
 {
@@ -114,6 +115,9 @@ void cli::check_required_params(const map<string, string>& param_map)
 
 void cli::set_default_param_values(map<string, string>& param_map)
 {
+	auto it = param_map.find("__config_template");
+	if (it != param_map.end()) return;
+
 	auto set_param = [&param_map](map<string, string>::iterator it, string name, string value) {
 		if (it == param_map.end())
 			param_map.insert({ name, value });
