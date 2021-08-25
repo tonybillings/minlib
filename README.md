@@ -8,13 +8,12 @@ For example, let's assume that your project utilizes Boost.  Normally, in order 
 
 ## Prerequisites 
 
-This tool has been designed to run on Windows and \*nix systems.  It depends on a C++ compiler and currently works with either the Microsoft Visual C++ (MSVC) compiler or GCC.  Any compiler that allows you to invoke the preprocessor and analyze the resulting output can (theoretically) be supported.  
+This tool has been designed to run on Windows and \*nix systems (**NOTE**: not yet tested on \*nix!).  It depends on a C++ compiler and currently works with either the Microsoft Visual C++ (MSVC) compiler or GCC.  Any compiler that allows you to invoke the preprocessor and analyze the resulting output can (theoretically) be supported.  
 
 If using the MSVC compiler, it is recommended to install Microsoft Visual Studio with the **Desktop Development with C++** workflow option.  That will install the compiler and a batch file (vcvars32.bat) that MinLib runs within a shell environment to set up the environment variables needed to run MSVC properly.  Running that batch file is the equivalent of opening the Visual Studio Developer Command Prompt.  
 
 For GCC, the only requirement is that GCC is installed and in your PATH.   
 
-For convenience, a precompiled 32-bit version of MinLib is included in the project's Dist folder.  
 
 ## Compiler Installation
 
