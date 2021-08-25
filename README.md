@@ -118,4 +118,9 @@ lib_out_dir = BundledBoost\lib
 
 Again, relative and absolute paths are supported in addition to the use of environment variables.  
 
+If you need MinLib to copy any other files, you can use the **copy_files** parameter to specify a space-delimited list of copy operations.  The format of each operation is **src>dst**, where **src** contains a valid absolute/relative path to a file and likewise **dst** is the target destination as an absolute/relative path (keeping the same filename or with a new one):
+```
+copy_files = SomeDir\SomeFile.txt>AnotherDir\SomeFile.txt SomeDir\SomeFile.txt>AnotherDir\NewName.txt
+```
+
 Once MinLib has extracted the needed files from the target library, you would then configure your IDE to use these files instead of the installed instance.  If using Visual Studio, for example, you could create a new build configuration that uses the bundled instance of the target library versus the installed one, simply by having it use different include/library paths.  
